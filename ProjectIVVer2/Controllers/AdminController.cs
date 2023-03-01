@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProjectIVVer2.Model;
+using ProjectIVVer2.Repository;
 using ProjectIVVer2.Services;
 
 namespace ProjectIVVer2.Controllers
@@ -9,30 +10,26 @@ namespace ProjectIVVer2.Controllers
     [ApiController]
     public class AdminController : ControllerBase
     {
-        private readonly AdminService _adminService;
+        private IAdmin service;
 
-        public AdminController(AdminService adminService)
+        public AdminController(Repository.IAdmin _service)
         {
-            _adminService = adminService;
+            service = _service;
         }
 
         [HttpGet("{username}/{password}")]
-        public async Task<ActionResult> Login(string username, string password)
+        public async Task<Admin> Login(string username, string password)
         {
-            var admin = await _adminService.LoginAsync(username, password);
+           
+            return await service.LoginAsync(username, password);
 
-            if (admin == null)
-            {
-                return Unauthorized();
-            }
-
-            return Ok(admin);
+            
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Admin>> Get(int id)
         {
-            var admin = await _adminService.GetByIdAsync(id);
+            var admin = await service.GetByIdAsync(id);
 
             if (admin == null)
             {
@@ -45,40 +42,40 @@ namespace ProjectIVVer2.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Admin>>> GetAll()
         {
-            var admins = await _adminService.GetAllAsync();
+            var admins = await service.GetAllAsync();
             return Ok(admins);
         }
 
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] Admin admin)
         {
-            var result = await _adminService.CreateAsync(admin);
+            var result = await service.CreateAsync(admin);
 
             if (result)
             {
-                return Ok();
+                return Ok(result);
             }
 
             return BadRequest();
         }
 
-        [HttpDelete("{username}")]
-        public async Task<ActionResult> Delete(string username)
-        {
-            var result = await _adminService.DeleteAdmin(username);
+        //[HttpDelete("{username}")]
+        //public async Task<ActionResult> Delete(string username)
+        //{
+        //    var result = await service.DeleteAdmin(username);
 
-            if (result)
-            {
-                return Ok();
-            }
+        //    if (result)
+        //    {
+        //        return Ok();
+        //    }
 
-            return NotFound();
-        }
+        //    return NotFound();
+        //}
 
         [HttpPut("{id}")]
         public async Task<ActionResult> Update(int id, [FromBody] Admin admin)
         {
-            var result = await _adminService.UpdateAsync(id, admin);
+            var result = await service.UpdateAsync(id, admin);
 
             if (result)
             {
@@ -91,7 +88,7 @@ namespace ProjectIVVer2.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var result = await _adminService.DeleteAsync(id);
+            var result = await service.DeleteAsync(id);
 
             if (result)
             {

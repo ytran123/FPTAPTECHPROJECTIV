@@ -6,7 +6,7 @@ namespace ProjectIVVer2.Data
 {
     public class EcommerceDBContext : DbContext
     {
-        public EcommerceDBContext(DbContextOptions<EcommerceDBContext> options) : base(options) { }
+        public EcommerceDBContext(DbContextOptions options) : base(options) { }
         public DbSet<Admin> Admins { get; set; }
     }
 }

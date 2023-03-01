@@ -8,48 +8,56 @@ namespace ProjectIVVer2.Services
     public class AdminService : Repository.IAdmin
     {
 
-        private readonly EcommerceDBContext _dbContext;
+        private readonly EcommerceDBContext dbContext;
 
-        public AdminService(EcommerceDBContext dbContext)
+        public AdminService(EcommerceDBContext _dbContext)
         {
-            _dbContext = dbContext;
+            dbContext = _dbContext;
         }
 
         public async Task<Admin> LoginAsync(string username, string password)
         {
-            var admin = _dbContext.Admins.Where(x => x.Username == username && x.Password == password).SingleOrDefault();
+            var admin = dbContext.Admins.Where(x => x.Username == username && x.Password == password).SingleOrDefault();
             return admin;
         }
 
         public async Task<Admin> GetByIdAsync(int id)
         {
-            var admin = await _dbContext.Admins.FindAsync(id);
+            var admin = await dbContext.Admins.FindAsync(id);
             return admin;
         }
 
         public async Task<IEnumerable<Admin>> GetAllAsync()
         {
-            var admins = await _dbContext.Admins.ToListAsync();
+            var admins = await dbContext.Admins.ToListAsync();
             return admins;
         }
 
         public async Task<bool> CreateAsync(Admin admin)
         {
-            await _dbContext.Admins.AddAsync(admin);
-            var result = await _dbContext.SaveChangesAsync();
-            return result > 0;
+            var model = dbContext.Admins.SingleOrDefault(a => a.Id.Equals(admin.Id));
+            if(model == null)
+            {
+                await dbContext.Admins.AddAsync(admin);
+                await   dbContext.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         public async Task<bool> DeleteAdmin(string username)
         {
             try
             {
-                var admin = await _dbContext.Admins.FirstOrDefaultAsync(x => x.Username == username);
+                var admin = await   dbContext.Admins.FirstOrDefaultAsync(x => x.Username == username);
 
                 if (admin != null)
                 {
-                    _dbContext.Admins.Remove(admin);
-                    await _dbContext.SaveChangesAsync();
+                    dbContext.Admins.Remove(admin);
+                    await dbContext.SaveChangesAsync();
                     return true;
                 }
 
@@ -63,7 +71,7 @@ namespace ProjectIVVer2.Services
 
         public async Task<bool> UpdateAsync(int id, Admin admin)
         {
-            Admin existingAdmin = await _dbContext.Admins
+            Admin existingAdmin = await     dbContext.Admins
             .SingleOrDefaultAsync(x => x.Id == id);
 
             if (existingAdmin != null)
@@ -73,7 +81,7 @@ namespace ProjectIVVer2.Services
                 existingAdmin.Password = admin.Password;
                 existingAdmin.role = admin.role;
 
-                int rowsAffected = await _dbContext.SaveChangesAsync();
+                int rowsAffected = await dbContext.SaveChangesAsync();
                 return rowsAffected > 0;
             }
 
@@ -81,14 +89,14 @@ namespace ProjectIVVer2.Services
         }
 
         public async Task<bool> DeleteAsync(int id)
-        {
-            Admin existingAdmin = await _dbContext.Admins
+        {   
+            Admin existingAdmin = await dbContext.Admins
             .SingleOrDefaultAsync(x => x.Id == id);
 
             if (existingAdmin != null)
             {
-                _dbContext.Admins.Remove(existingAdmin);
-                int rowsAffected = await _dbContext.SaveChangesAsync();
+                dbContext.Admins.Remove(existingAdmin);
+                int rowsAffected = await dbContext.SaveChangesAsync();
                 return rowsAffected > 0;
             }
 
